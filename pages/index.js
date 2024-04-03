@@ -1,57 +1,38 @@
 import Head from "next/head";
 import Link from "next/link";
-import { gql } from "@apollo/client"; 
-import { getApolloClient } from "../lib/apollo-client"; 
-import styles from "../styles/Home.module.css";
+import { gql } from "@apollo/client";
+import { getApolloClient } from "../lib/apollo-client";
 
 export default function Home({ page, posts }) {
-  const { title, description } = page;
+  const { title, description,url  } = page;
   return (
-    <div className={styles.container}>
+    <div>
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <main className="main">
+      {posts &&
+        posts.length > 0 &&
+        posts.map((post) => {
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>{title}</h1>
+          return (
+        <div className="card w-96 glass">
+          <figure><img src={url} alt="car!" /></figure>
+          <div className="card-body">
+             <h2 className="card-title" dangerouslySetInnerHTML={{__html: post.title}}></h2>  
+          </div>
+        </div>
+          );
+        })}
 
-        <p className={styles.description}>{description}</p>
-
-        <ul className={styles.grid}>
-          {posts &&
-            posts.length > 0 &&
-            posts.map((post) => {
-              console.log(post);
-              return (
-                <li key={post.slug} className={styles.card}>
-                  <Link href={post.path}>
-                    <a>
-                      <h3
-                        dangerouslySetInnerHTML={{
-                          __html: post.title,
-                        }}
-                      />
-                      <div
-                        className={styles.excerpt}
-                        dangerouslySetInnerHTML={{
-                          __html: post.excerpt,
-                        }}
-                      />
-                    </a>
-                  </Link>
-                </li>
-              );
-            })}
-
-          {!posts ||
-            (posts.length === 0 && (
-              <li>
-                <p>Oops, no posts found!</p>
-              </li>
-            ))}
-        </ul>
+      {!posts ||
+        (posts.length === 0 && (
+          <li>
+            <p>Oops, no posts found!</p>
+          </li>
+        ))} 
       </main>
     </div>
   );
@@ -82,6 +63,7 @@ export async function getStaticProps({ locale }) {
         generalSettings {
           title
           description
+          url
         }
       }
     `,
