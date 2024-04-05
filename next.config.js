@@ -1,4 +1,4 @@
-module.exports = {
+ module.exports = {
   reactStrictMode: true,
   i18n: {
     locales: ["en","hi","mr"],

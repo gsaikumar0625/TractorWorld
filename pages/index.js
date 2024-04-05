@@ -1,96 +1,38 @@
-import Head from "next/head";
-import Link from "next/link";
-import { gql } from "@apollo/client";
-import { getApolloClient } from "../lib/apollo-client";
+import { getLocaleProps } from "../utils";
+import { HOME_SLIDERS } from "../utils/constants"; 
+import { useQuery } from "@apollo/client";
+import { useTranslation } from 'next-i18next'; 
+ 
+export default function Home({ locale }) {
 
-export default function Home({ page, posts }) {
-  const { title, description,url  } = page;
+  const { t, i18n } = useTranslation(); 
+  const language = locale.toUpperCase();  
+  const { loading, error, data } = useQuery(HOME_SLIDERS, {
+    variables: { lang: language }
+  });
+ 
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  // If data is available, render it
   return (
     <div>
-      <Head>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="main">
-      {posts &&
-        posts.length > 0 &&
-        posts.map((post) => {
-
-          return (
-        <div className="card w-96 glass">
-          <figure><img src={url} alt="car!" /></figure>
-          <div className="card-body">
-             <h2 className="card-title" dangerouslySetInnerHTML={{__html: post.title}}></h2>  
-          </div>
-        </div>
-          );
-        })}
-
-      {!posts ||
-        (posts.length === 0 && (
-          <li>
-            <p>Oops, no posts found!</p>
+      <h1>Home Sliders</h1> 
+      <p>Current Locale: {i18n.language}</p>
+      <h1>{t('compareTractor')}</h1>
+      <ul>
+        {data.homeSliders.nodes.map((slider, index) => (
+          <li key={index}>
+            <h2>{slider.homeSliders.tittle}</h2>
+            <p>Price: {slider.homeSliders.price}</p>
+            <p>Year: {slider.homeSliders.year}</p>
+            <img src={slider.homeSliders.sliderimage.node.mediaItemUrl} alt="Slider Image" />
           </li>
-        ))} 
-      </main>
+        ))}
+      </ul>
     </div>
   );
 }
-
-export async function getStaticProps({ locale }) {
-  const apolloClient = getApolloClient();
-
-  const language = locale.toUpperCase();
-
-  const data = await apolloClient.query({
-    query: gql`
-      query posts($language: LanguageCodeFilterEnum!) {
-        posts(where: { language: $language }) {
-          edges {
-            node {
-              id
-              excerpt
-              title
-              slug
-              language {
-                code
-                locale
-              }
-            }
-          }
-        }
-        generalSettings {
-          title
-          description
-          url
-        }
-      }
-    `,
-    variables: {
-      language,
-    },
-  });
-
-  let posts = data?.data.posts.edges
-
-    .map(({ node }) => node)
-    .map((post) => {
-      return {
-        ...post,
-        language,
-        path: `/posts/${post.slug}`,
-      };
-    });
-
-  const page = {
-    ...data?.data.generalSettings,
-  };
-
-  return {
-    props: {
-      page,
-      posts,
-    },
-  };
+export async function getServerSideProps(context) {
+  return await getLocaleProps(context);
 }

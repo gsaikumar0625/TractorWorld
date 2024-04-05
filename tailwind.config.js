@@ -23,9 +23,5 @@ module.exports = {
          "checkbox-color":"#edecf7"
       },
     },
-  },
-  plugins: [require("daisyui")],
-  daisyui: {
-    themes: ["light", "dark"]
-  },
+  } 
 }
